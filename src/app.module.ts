@@ -1,20 +1,30 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { Configuration } from './config/config.keys';
-import { ConfigModule } from './config/config.module';
-import { ConfigService } from './config/config.service';
-import { DatabaseModule } from './database/database.module';
+import { UserModule } from './users/user.module';
 
 @Module({
-  imports: [ConfigModule, DatabaseModule],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'daga',
+      database: 'Knowing_Cuba_Nestjs',
+      entities: [__dirname + './**/**/*entity{.ts,.js}'],
+      migrationsRun: true,
+      migrations: [__dirname, '../migration/**/*{.ts,.js}'],
+      migrationsTableName: 'migrations_typeorm',
+      cli: {
+        migrationsDir: 'src/migration',
+      },
+      autoLoadEntities: true,
+      synchronize: true,
+    }),
+    UserModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  static port: number | string;
-
-  constructor(private readonly _configService: ConfigService) {
-    AppModule.port = _configService.get(Configuration.PORT)
-  }
-}
+export class AppModule { }
