@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from './entities/user.entity';
+import { UserEntity } from './entities';
 import { CreateUserDto, EditUserDto } from './dtos';
+import { hashSync, genSaltSync } from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -24,9 +25,30 @@ export class UserService {
         return user;
     }
 
+    async getUserByName(userName: string) {
+
+        const user = await this.userRepository.findOne({ userName });
+
+        if (!user) return;
+
+        return user;
+    }
+
     async createUser(userDto: CreateUserDto) {
-        
-        return await this.userRepository.save(userDto);
+
+        try {
+            userDto.password = hashSync(userDto.password, genSaltSync());
+
+            const user = await this.userRepository.save(userDto);
+
+            delete user.password;
+            delete user.isActive;
+            delete user.id;
+
+            return user;
+        } catch (error) {
+            return error;
+        }      
     }
 
     async updateUser(id: number, userDto: EditUserDto) {

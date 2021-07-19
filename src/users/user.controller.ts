@@ -8,7 +8,7 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('users')
 export class UserController {
 
-    constructor(private readonly userService: UserService) {}
+    constructor(private readonly userService: UserService) { }
 
     @Get()
     async userList() {
@@ -20,21 +20,27 @@ export class UserController {
         return await this.userService.getUserById(id);
     }
 
+    @Get('/userName/:userName')
+    async getUserByName(@Param('userName') userName: string) {
+
+        return await this.userService.getUserByName(userName);
+    }
+    
     @Post()
     async createUser(@Body() userDto: CreateUserDto) {
-        
+
         return this.userService.createUser(userDto);
     }
 
     @Put(':id')
     async updateUser(@Param('id', ParseIntPipe) id: number, @Body() userDto: EditUserDto) {
-        
+
         return await this.userService.updateUser(id, userDto);
     }
-   
+
     @Delete(':id')
     async deleteUser(@Param('id', ParseIntPipe) id: number) {
-        
+
         return await this.userService.deleteUser(id);
     }
- }
+}
